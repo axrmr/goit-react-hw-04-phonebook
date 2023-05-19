@@ -5,6 +5,8 @@ import ContactList from './ContactList/ContactList';
 import Filter from './Filter/Filter';
 import ReactLogo from './ReactLogo/ReactLogo';
 
+const CONTACTS_STORAGE_KEY = 'phonebook-contacts';
+
 class App extends Component {
   state = {
     contacts: [
@@ -16,6 +18,16 @@ class App extends Component {
     filter: '',
   };
 
+  componentDidMount() {
+    const storContacts = JSON.parse(localStorage.getItem(CONTACTS_STORAGE_KEY));
+
+    if (storContacts) {
+      this.setState({ contacts: storContacts });
+    } else {
+      this.saveToStorage(CONTACTS_STORAGE_KEY, this.state.contacts);
+    }
+  }
+
   addContact = newContact => {
     const isNameInContacts = this.state.contacts.find(
       contact => contact.name === newContact.name
@@ -25,10 +37,17 @@ class App extends Component {
       const { name } = isNameInContacts;
       alert(` ${name} is already in contacts!`);
     } else {
-      this.setState(prev => ({
-        contacts: [...prev.contacts, newContact],
-      }));
+      this.setState(
+        prev => ({
+          contacts: [...prev.contacts, newContact],
+        }),
+        () => this.saveToStorage(CONTACTS_STORAGE_KEY, this.state.contacts)
+      );
     }
+  };
+
+  saveToStorage = (key, item) => {
+    localStorage.setItem(key, JSON.stringify(item));
   };
 
   handleFilterChange = e => {
@@ -45,9 +64,12 @@ class App extends Component {
   };
 
   deleteContact = id => {
-    this.setState({
-      contacts: this.state.contacts.filter(contact => contact.id !== id),
-    });
+    this.setState(
+      {
+        contacts: this.state.contacts.filter(contact => contact.id !== id),
+      },
+      () => this.saveToStorage(CONTACTS_STORAGE_KEY, this.state.contacts)
+    );
   };
 
   render() {
