@@ -1,5 +1,5 @@
-import PropTypes from 'prop-types';
 import { nanoid } from 'nanoid';
+import PropTypes from 'prop-types';
 import { Component } from 'react';
 import Form from './ContactForm.styled';
 
@@ -8,21 +8,17 @@ const INITIAL_VALUE = { name: '', number: '' };
 class ContactForm extends Component {
   state = { ...INITIAL_VALUE };
 
-  handleChange = e => {
-    const { name, value } = e.target;
+  handleChange = ({ target: { name, value } }) => {
     this.setState({ [name]: value });
   };
 
   handleSubmit = e => {
     e.preventDefault();
-
-    const newContact = {
+    this.props.addContact({
       id: nanoid(),
       name: this.state.name,
       number: this.state.number,
-    };
-    this.props.addContact(newContact);
-
+    });
     this.setState({ ...INITIAL_VALUE });
   };
 
