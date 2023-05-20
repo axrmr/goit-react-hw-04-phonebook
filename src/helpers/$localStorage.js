@@ -2,10 +2,9 @@ const set = (key, item) => {
   try {
     if (item === null) {
       throw new Error(`"${item}" cannot be added to local storage}`);
-    } else {
-      const serializedData = JSON.stringify(item);
-      localStorage.setItem(key, serializedData);
     }
+    const serializedData = JSON.stringify(item);
+    localStorage.setItem(key, serializedData);
   } catch (err) {
     console.error('Local Storage "set" state error', err.message);
   }
