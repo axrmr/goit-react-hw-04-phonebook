@@ -4,6 +4,7 @@ import ContactForm from './ContactForm/ContactForm';
 import ContactList from './ContactList/ContactList';
 import Filter from './Filter/Filter';
 import ReactLogo from './ReactLogo/ReactLogo';
+import $localStorage from './helpers/$localStorage';
 
 const CONTACTS_STORAGE_KEY = 'phonebook-contacts';
 
@@ -19,35 +20,33 @@ class App extends Component {
   };
 
   componentDidMount() {
-    const storContacts = JSON.parse(localStorage.getItem(CONTACTS_STORAGE_KEY));
+    const storageContacts = $localStorage.get(CONTACTS_STORAGE_KEY);
 
-    if (storContacts) {
-      this.setState({ contacts: storContacts });
+    if (storageContacts) {
+      this.setState({ contacts: storageContacts });
     } else {
-      this.saveToStorage(CONTACTS_STORAGE_KEY, this.state.contacts);
+      $localStorage.set(CONTACTS_STORAGE_KEY, this.state.contacts);
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.contacts !== this.state.contacts) {
+      $localStorage.set(CONTACTS_STORAGE_KEY, this.state.contacts);
     }
   }
 
   addContact = newContact => {
-    const isNameInContacts = this.state.contacts.find(
+    const contact = this.state.contacts.find(
       contact => contact.name === newContact.name
     );
 
-    if (isNameInContacts) {
-      const { name } = isNameInContacts;
-      alert(` ${name} is already in contacts!`);
+    if (contact) {
+      alert(` ${contact.name} is already in contacts!`);
     } else {
-      this.setState(
-        prev => ({
-          contacts: [...prev.contacts, newContact],
-        }),
-        () => this.saveToStorage(CONTACTS_STORAGE_KEY, this.state.contacts)
-      );
+      this.setState(prev => ({
+        contacts: [...prev.contacts, newContact],
+      }));
     }
-  };
-
-  saveToStorage = (key, item) => {
-    localStorage.setItem(key, JSON.stringify(item));
   };
 
   handleFilterChange = e => {
@@ -64,12 +63,9 @@ class App extends Component {
   };
 
   deleteContact = id => {
-    this.setState(
-      {
-        contacts: this.state.contacts.filter(contact => contact.id !== id),
-      },
-      () => this.saveToStorage(CONTACTS_STORAGE_KEY, this.state.contacts)
-    );
+    this.setState({
+      contacts: this.state.contacts.filter(contact => contact.id !== id),
+    });
   };
 
   render() {
